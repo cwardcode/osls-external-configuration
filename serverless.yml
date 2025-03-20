@@ -11,7 +11,6 @@ provider:
   runtime: nodejs18.x
   memorySize: 128 # optional, in MB, default is 1024
   stage: ${opt:stage, 'local'}
-  region: eu-west-1
   # Valid values: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-logs-loggroup.html
   logRetentionInDays: 365
 
