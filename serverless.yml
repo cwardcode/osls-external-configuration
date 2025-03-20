@@ -1,0 +1,43 @@
+service: online-library-oss
+
+plugins:
+  - serverless-plugin-typescript
+  - serverless-plugin-optimize
+  - serverless-offline
+provider:
+  name: aws
+  tracing:
+    apiGateway: true
+  runtime: nodejs18.x
+  memorySize: 128 # optional, in MB, default is 1024
+  stage: ${opt:stage, 'local'}
+  region: eu-west-1
+  # Valid values: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-logs-loggroup.html
+  logRetentionInDays: 365
+
+custom:
+  region: ${opt:region, 'us-east-1'}
+
+  Configuration: ${opt:Configuration, 'serverless.${self:provider.stage}.yml'}
+  TestParam: ${param:MyCustomParam, file(${self:custom.Configuration}):MyCustomParam}
+package:
+  exclude:
+    - .gitignore
+    - README.md
+    - serverless.yml
+    - nest-cli.json
+    - .prettierrc
+  excludeDevDependencies: true
+  individually: true
+
+functions:
+  main:
+    handler: src/main.handler
+    reservedConcurrency: 5 # default, change according to your needs
+    layers: # AWS Powertools layer for EMF metrics
+      - arn:aws:lambda:eu-west-1:094274105915:layer:AWSLambdaPowertoolsTypeScript:28
+    events:
+      - http:
+          method: any
+          path: /{proxy+}
+          cors: true
